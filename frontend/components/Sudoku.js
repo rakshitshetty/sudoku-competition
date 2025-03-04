@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import styles from "../styles/Sudoku.module.css";
 
-const Sudoku = () => {
+const Sudoku = ({ user }) => {
   const [puzzle, setPuzzle] = useState(null);
   const [solution, setSolution] = useState(null);
   const [userInput, setUserInput] = useState({});
@@ -11,19 +11,42 @@ const Sudoku = () => {
   const [shakeCells, setShakeCells] = useState({});
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      fetchDailyPuzzle();
-    }
+    const fetchPuzzle = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/daily-puzzle");
+        const data = await response.json();
+        setPuzzle(data.puzzle);
+        setSolution(data.solution);
+      } catch (error) {
+        console.error("Error fetching puzzle:", error);
+      }
+    };
+
+    fetchPuzzle();
   }, []);
 
-  const fetchDailyPuzzle = async () => {
+  const submitScore = async (timeTaken) => {
+    if (!user) {
+      alert("You need to log in to submit your score!");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:5000/api/daily-puzzle");
-      const data = await response.json();
-      setPuzzle(data.puzzle);
-      setSolution(data.solution);
+      const response = await fetch("http://localhost:5000/api/submit-score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ time_taken: timeTaken }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        alert(`🎉 Congratulations! You solved the puzzle in ${timeTaken} seconds.`);
+        setIsSolved(true);
+      } else {
+        alert("Error submitting score.");
+      }
     } catch (error) {
-      console.error("Error fetching puzzle:", error);
+      console.error("Error:", error);
     }
   };
 
