@@ -1,0 +1,44 @@
+.leaderboardContainer {
+    width: 350px;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+  }
+  
+  .leaderboardTitle {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table th, .table td {
+    text-align: left;
+    padding: 10px;
+  }
+  
+  .table th {
+    background: rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+  }
+  
+  .table tr {
+    transition: background 0.2s ease-in-out;
+  }
+  
+  .table tr:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  .goldRow {
+    font-weight: bold;
+    background: #ffeb3b;
+  }
+  

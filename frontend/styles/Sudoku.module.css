@@ -1,0 +1,77 @@
+.sudokuContainer {
+    text-align: center;
+    width: 500px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(9, 50px);
+    grid-template-rows: repeat(9, 50px);
+    gap: 2px;
+    /*border: 2px solid rgba(0, 0, 0, 0.2);*/
+    border-radius: 10px;
+    justify-content: center;
+  }
+  
+  .cell {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 22px;
+    font-weight: bold;
+    transition: background 0.3s ease, border 0.3s ease, color 0.3s ease, font-size 0.2s ease;
+    border: 1px solid #ccc;
+  }
+  
+  .input {
+    width: 100%;
+    height: 100%;
+    font-size: 22px;
+    text-align: center;
+    border: none;
+    outline: none;
+    /*font-weight: bold;*/
+    background: transparent;
+    color: #007aff;
+  }
+  
+  /* Highlight row and column */
+  .highlighted {
+    background-color: rgba(200, 200, 200, 0.4);
+  }
+  
+  /* Incorrect input */
+  .wrong {
+    border: 2px solid #d32f2f;
+    color: #d32f2f;
+  }
+  
+  /* Shake animation for incorrect input */
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    50% { transform: translateX(3px); }
+    75% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+  }
+  
+  .shake {
+    animation: shake 0.2s ease-in-out 2;
+  }
+  
+  .sameNumber {
+    font-size: 26px; /* 🔥 Slightly larger font */
+    font-weight: bold;
+    transition: font-size 0.2s ease-in-out;
+  }
+  
+  

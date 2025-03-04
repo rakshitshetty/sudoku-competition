@@ -1,0 +1,21 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE puzzles (
+    id SERIAL PRIMARY KEY,
+    puzzle JSON NOT NULL,
+    solution JSON NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE leaderboard (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    puzzle_id INTEGER REFERENCES puzzles(id),
+    time_taken INTEGER NOT NULL,
+    completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
