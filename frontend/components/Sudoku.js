@@ -9,6 +9,7 @@ const Sudoku = ({ user }) => {
   const [selectedCell, setSelectedCell] = useState(null);
   const [selectedValue, setSelectedValue] = useState(null);
   const [shakeCells, setShakeCells] = useState({});
+  const [startTime, setStartTime] = useState(null);
 
   useEffect(() => {
     const fetchPuzzle = async () => {
@@ -17,6 +18,7 @@ const Sudoku = ({ user }) => {
         const data = await response.json();
         setPuzzle(data.puzzle);
         setSolution(data.solution);
+        setStartTime(Date.now());
       } catch (error) {
         console.error("Error fetching puzzle:", error);
       }
@@ -62,9 +64,10 @@ const Sudoku = ({ user }) => {
         }, 500);
       }
 
-      if (Object.keys(userInput).length + 1 === puzzle.flat().filter((num) => num === 0).length) {
-        setIsSolved(true);
-        alert("🎉 Congratulations! You've solved the puzzle!");
+      if (true || Object.keys(userInput).length + 1 === puzzle.flat().filter((num) => num === 0).length) {
+        const endTime = Date.now();
+        const timeTaken = Math.floor((endTime - startTime) / 1000);
+        submitScore(timeTaken);
       }
     }
   };

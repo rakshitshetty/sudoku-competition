@@ -3,8 +3,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const pool = require("../database/db");
 const router = express.Router();
-
+/*
 router.post("/login", async (req, res) => {
+  console.log("Received login request:", req.body);
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -13,6 +14,7 @@ router.post("/login", async (req, res) => {
 
   try {
     const userQuery = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
+    console.log("Database response:", userResult.rows);
     const user = userQuery.rows[0];
 
     if (!user) {
@@ -20,6 +22,7 @@ router.post("/login", async (req, res) => {
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
+    console.log("Password match:", passwordMatch);
     if (!passwordMatch) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
@@ -31,7 +34,7 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
+*/
 router.post("/signup", async (req, res) => {
     const { username, password } = req.body;
   

@@ -7,6 +7,9 @@ const { Pool } = require('pg');
 const socketIo = require('socket.io');
 const http = require('http');
 
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -57,7 +60,7 @@ app.get('/api/daily-puzzle', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+/*
 // Login Route
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
@@ -79,6 +82,37 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+*/
+
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username and password required" });
+  }
+
+  try {
+    const userQuery = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
+    const user = userQuery.rows[0];
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    const token = jwt.sign({ userId: user.id, username: user.username }, "secret", { expiresIn: "1h" });
+    res.json({ token });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 
 // Submit Score Route
 app.post('/api/submit-score', async (req, res) => {
