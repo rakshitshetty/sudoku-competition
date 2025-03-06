@@ -37,6 +37,22 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
+// Middleware for JWT Authentication
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Authenticate: You need to log in to submit your score!" });
+  }
+  console.log("Raw Authorization Header:", req.headers.authorization);
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: "Invalid or expired token!" });
+    }
+    req.user = user; // Attach user data to the request
+    next();
+  });
+};
+
 // Socket.io Connection
 io.on("connection", (socket) => {
   console.log("A user connected!");
@@ -104,7 +120,7 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    const token = jwt.sign({ userId: user.id, username: user.username }, "secret", { expiresIn: "1h" });
+    const token = jwt.sign({ userId: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
     res.json({ token });
   } catch (error) {
     console.error("Login error:", error);
@@ -115,8 +131,8 @@ app.post('/api/login', async (req, res) => {
 
 
 // Submit Score Route
-app.post('/api/submit-score', async (req, res) => {
-  const user_id = req.session.user_id;
+app.post('/api/submit-score', authenticate, async (req, res) => {
+  const user_id = req.user.userId; // Get user_id from JWT
   const { time_taken } = req.body;
 
   if (!user_id || !time_taken) {
@@ -135,6 +151,7 @@ app.post('/api/submit-score', async (req, res) => {
     res.status(500).json({ error: "Error submitting score" });
   }
 });
+
 
 const leaderboardRoutes = require("./routes/leaderboard");
 app.use("/api/leaderboard", leaderboardRoutes);

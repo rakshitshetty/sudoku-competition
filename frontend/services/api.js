@@ -13,7 +13,6 @@ export const fetchDailyPuzzle = async () => {
   }
 };
 
-
 const API_URL = "http://localhost:5000/api";
 
 export const registerUser = async (username, password) => {
@@ -31,5 +30,28 @@ export const loginUser = async (username, password) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   });
+
+  const data = await response.json();
+  if (data.token) {
+    localStorage.setItem("token", data.token); // Store token after login
+  }
+  return data;
+};
+
+export const submitScore = async (time_taken) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("User not logged in!");
+  }
+
+  const response = await fetch(`${API_URL}/submit-score`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}` // Attach token
+    },
+    body: JSON.stringify({ time_taken }),
+  });
+
   return response.json();
 };

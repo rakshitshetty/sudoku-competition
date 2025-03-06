@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Sudoku from "../components/Sudoku";
 import Leaderboard from "../components/Leaderboard";
 import Navbar from "../components/Navbar";
+import { AuthProvider } from "../context/AuthContext";
 
 const Home = () => {
   const [isClient, setIsClient] = useState(false);
@@ -12,13 +13,15 @@ const Home = () => {
 
   return (
     isClient && (
-      <div style={styles.pageContainer}>
-        <Navbar />
-        <div style={styles.gameContainer}>
-          <Sudoku />
-          <Leaderboard />
+      <AuthProvider>
+        <div style={styles.pageContainer}>
+          <Navbar />
+          <div style={styles.gameContainer}>
+            <Sudoku />
+            <Leaderboard />
+          </div>
         </div>
-      </div>
+      </AuthProvider>
     )
   );
 };

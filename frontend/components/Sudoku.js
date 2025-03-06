@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import styles from "../styles/Sudoku.module.css";
+import AuthContext from "../context/AuthContext";
 
-const Sudoku = ({ user }) => {
+
+const Sudoku = () => {
+  const { user } = useContext(AuthContext);
   const [puzzle, setPuzzle] = useState(null);
   const [solution, setSolution] = useState(null);
   const [userInput, setUserInput] = useState({});
@@ -28,15 +31,19 @@ const Sudoku = ({ user }) => {
   }, []);
 
   const submitScore = async (timeTaken) => {
-    if (!user) {
-      alert("You need to log in to submit your score!");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("UI submit score You need to log in to submit your score!");
       return;
     }
 
     try {
       const response = await fetch("http://localhost:5000/api/submit-score", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // Attach token
+          },
         body: JSON.stringify({ time_taken: timeTaken }),
         credentials: "include",
       });
@@ -64,7 +71,7 @@ const Sudoku = ({ user }) => {
         }, 500);
       }
 
-      if (true || Object.keys(userInput).length + 1 === puzzle.flat().filter((num) => num === 0).length) {
+      if (Object.keys(userInput).length + 1 === puzzle.flat().filter((num) => num === 0).length) {
         const endTime = Date.now();
         const timeTaken = Math.floor((endTime - startTime) / 1000);
         submitScore(timeTaken);
