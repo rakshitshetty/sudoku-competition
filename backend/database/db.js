@@ -2,11 +2,11 @@ const { Pool } = require("pg");
 
 // Configure PostgreSQL connection
 const pool = new Pool({
-  user: "sudoku_user", // Change if your username is different
-  host: "localhost",
-  database: "sudoku",
-  password: "sudoku_pass", // Ensure this matches the actual password
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASS,
+  port: process.env.DB_PORT,
 });
 
 module.exports = pool;

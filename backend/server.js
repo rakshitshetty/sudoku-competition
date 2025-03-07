@@ -1,13 +1,8 @@
 require('dotenv').config();
 const express = require("express");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 const session = require("express-session");
-const { Pool } = require('pg');
 const http = require('http');
-
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 
 const app = express();
 const server = http.createServer(app);
@@ -30,15 +25,6 @@ app.use(session({
   cookie: { secure: false }
 }));
 
-// PostgreSQL Connection
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASS,
-  port: process.env.DB_PORT,
-});
-
 const leaderboardRoutes = require("./routes/leaderboard");
 app.use("/api/leaderboard", leaderboardRoutes);
 
@@ -47,11 +33,6 @@ app.use("/api/auth", authRoutes);
 
 const puzzleRoutes = require("./routes/puzzle");
 app.use("/api/puzzle", puzzleRoutes);
-
-// Test Route
-app.get('/', (req, res) => {
-  res.send('Sudoku Backend is Running 🚀');
-}); 
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
