@@ -4,7 +4,6 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const session = require("express-session");
 const { Pool } = require('pg');
-//const socketIo = require('socket.io');
 const http = require('http');
 
 const bcrypt = require("bcrypt");
@@ -14,11 +13,12 @@ const app = express();
 const server = http.createServer(app);
 const socket = require("./socket");
 socket.init(server);
-// const io = socketIo(server, {
-//   cors: { origin: "http://localhost:3000", methods: ["GET", "POST"] },
-// });
 
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({
+  origin: "http://localhost:3000", // ✅ Allow frontend origin
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true // ✅ Allow cookies and authentication headers
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -55,15 +55,6 @@ const authenticate = (req, res, next) => {
   });
 };
 
-// Socket.io Connection
-// io.on("connection", (socket) => {
-//   console.log("A user connected!");
-
-//   socket.on("disconnect", () => {
-//     console.log("A user disconnected");
-//   });
-// });
-
 // Test Route
 app.get('/', (req, res) => {
   res.send('Sudoku Backend is Running 🚀');
@@ -77,7 +68,7 @@ app.get('/api/daily-puzzle', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+}); 
 
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
