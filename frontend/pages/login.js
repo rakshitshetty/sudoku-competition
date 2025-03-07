@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import styles from "../styles/Login.module.css";
+import { loginUser } from "../services/authServices";
 
 const Login = () => {
   const router = useRouter();
@@ -16,24 +17,14 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+    const data = await loginUser(formData);
 
-      const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("username", data.username);
-        router.push("/");
-      } else {
-        setError(data.error || "Invalid credentials");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("Something went wrong. Please try again.");
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", data.username);
+      router.push("/");
+    } else {
+      setError(data.error || "Invalid credentials");
     }
   };
 
