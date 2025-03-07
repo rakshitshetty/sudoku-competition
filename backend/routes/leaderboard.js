@@ -27,26 +27,4 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Add a new score to the leaderboard
-router.post("/", async (req, res) => {
-  const { user_id, time_taken } = req.body;
-
-  // Ensure required data is provided
-  if (!user_id || !time_taken) {
-    return res.status(400).json({ error: "User ID and time taken required" });
-  }
-
-  try {
-    await pool.query(
-      "INSERT INTO leaderboard (user_id, time_taken) VALUES ($1, $2)",
-      [user_id, time_taken]
-    );
-
-    res.json({ message: "Score added successfully!" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
 module.exports = router;

@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const session = require("express-session");
 const { Pool } = require('pg');
-const socketIo = require('socket.io');
+//const socketIo = require('socket.io');
 const http = require('http');
 
 const bcrypt = require("bcrypt");
@@ -12,9 +12,11 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: { origin: "http://localhost:3000", methods: ["GET", "POST"] },
-});
+const socket = require("./socket");
+socket.init(server);
+// const io = socketIo(server, {
+//   cors: { origin: "http://localhost:3000", methods: ["GET", "POST"] },
+// });
 
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
@@ -54,13 +56,13 @@ const authenticate = (req, res, next) => {
 };
 
 // Socket.io Connection
-io.on("connection", (socket) => {
-  console.log("A user connected!");
+// io.on("connection", (socket) => {
+//   console.log("A user connected!");
 
-  socket.on("disconnect", () => {
-    console.log("A user disconnected");
-  });
-});
+//   socket.on("disconnect", () => {
+//     console.log("A user disconnected");
+//   });
+// });
 
 // Test Route
 app.get('/', (req, res) => {
@@ -76,29 +78,6 @@ app.get('/api/daily-puzzle', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-/*
-// Login Route
-app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const userResult = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
-
-    if (userResult.rows.length === 0) {
-      return res.status(401).json({ error: "Invalid username or password" });
-    }
-
-    const user = userResult.rows[0];
-    if (password !== user.password) {
-      return res.status(401).json({ error: "Invalid username or password" });
-    }
-
-    req.session.user_id = user.id; // Store user_id in session
-    res.json({ message: "Login successful", user_id: user.id });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-*/
 
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
@@ -143,6 +122,7 @@ app.post('/api/submit-score', authenticate, async (req, res) => {
     await pool.query("INSERT INTO leaderboard (user_id, time_taken) VALUES ($1, $2)", [user_id, time_taken]);
 
     // Emit leaderboard update to all connected clients
+    const io = socket.getIo();
     io.emit("leaderboardUpdate");
 
     res.json({ message: "Score submitted successfully!" });
