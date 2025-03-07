@@ -45,19 +45,12 @@ app.use("/api/leaderboard", leaderboardRoutes);
 const authRoutes = require("./routes/auth");
 app.use("/api/auth", authRoutes);
 
+const puzzleRoutes = require("./routes/puzzle");
+app.use("/api/puzzle", puzzleRoutes);
+
 // Test Route
 app.get('/', (req, res) => {
   res.send('Sudoku Backend is Running 🚀');
-});
-
-// Fetch Daily Sudoku Puzzle
-app.get('/api/daily-puzzle', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM puzzles ORDER BY created_at DESC LIMIT 1');
-    res.json(result.rows[0]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 }); 
 
 const PORT = process.env.PORT || 5000;

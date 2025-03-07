@@ -17,7 +17,7 @@ const Sudoku = () => {
   useEffect(() => {
     const fetchPuzzle = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/daily-puzzle");
+        const response = await fetch("http://localhost:5000/api/puzzle/daily-puzzle");
         const data = await response.json();
         setPuzzle(data.puzzle);
         setSolution(data.solution);
