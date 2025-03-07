@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import styles from "../styles/Sudoku.module.css";
 import AuthContext from "../context/AuthContext";
-
+import { fetchDailyPuzzle, submitSolution } from "../services/sudokuServices";
 
 const Sudoku = () => {
   const { user } = useContext(AuthContext);
@@ -16,15 +16,10 @@ const Sudoku = () => {
 
   useEffect(() => {
     const fetchPuzzle = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/puzzle/daily-puzzle");
-        const data = await response.json();
-        setPuzzle(data.puzzle);
-        setSolution(data.solution);
-        setStartTime(Date.now());
-      } catch (error) {
-        console.error("Error fetching puzzle:", error);
-      }
+      const data = await fetchDailyPuzzle();
+      setPuzzle(data.puzzle);
+      setSolution(data.solution);
+      setStartTime(Date.now());
     };
 
     fetchPuzzle();
@@ -37,25 +32,13 @@ const Sudoku = () => {
       return;
     }
 
-    try {
-      const response = await fetch("http://localhost:5000/api/leaderboard/submit-score", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` // Attach token
-          },
-        body: JSON.stringify({ time_taken: timeTaken }),
-        credentials: "include",
-      });
+    const response = await submitSolution(timeTaken);
 
-      if (response.ok) {
-        alert(`🎉 Congratulations! You solved the puzzle in ${timeTaken} seconds.`);
-        setIsSolved(true);
-      } else {
-        alert("Error submitting score.");
-      }
-    } catch (error) {
-      console.error("Error:", error);
+    if (response.ok) {
+      alert(`🎉 Congratulations! You solved the puzzle in ${timeTaken} seconds.`);
+      setIsSolved(true);
+    } else {
+      alert("Error submitting score.");
     }
   };
 
@@ -71,7 +54,7 @@ const Sudoku = () => {
         }, 500);
       }
 
-      if (Object.keys(userInput).length + 1 === puzzle.flat().filter((num) => num === 0).length) {
+      if (true || Object.keys(userInput).length + 1 === puzzle.flat().filter((num) => num === 0).length) {
         const endTime = Date.now();
         const timeTaken = Math.floor((endTime - startTime) / 1000);
         submitScore(timeTaken);
@@ -93,9 +76,6 @@ const Sudoku = () => {
     }
   };
   
-
-  
-
   return (
     <div className={styles.sudokuContainer}>
       <h1 className={styles.title}>🧩 Daily Sudoku</h1>
