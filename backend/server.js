@@ -46,7 +46,7 @@ const userRoutes = require("./routes/users");
 app.use("/api/users", userRoutes);
 
 const authRoutes = require("./routes/auth");
-app.use("/api", authRoutes);
+app.use("/api/auth", authRoutes);
 
 // Test Route
 app.get('/', (req, res) => {
@@ -63,33 +63,33 @@ app.get('/api/daily-puzzle', async (req, res) => {
   }
 }); 
 
-app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
+// app.post('/api/login', async (req, res) => {
+//   const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ error: "Username and password required" });
-  }
+//   if (!username || !password) {
+//     return res.status(400).json({ error: "Username and password required" });
+//   }
 
-  try {
-    const userQuery = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
-    const user = userQuery.rows[0];
+//   try {
+//     const userQuery = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
+//     const user = userQuery.rows[0];
 
-    if (!user) {
-      return res.status(401).json({ error: "Invalid username or password" });
-    }
+//     if (!user) {
+//       return res.status(401).json({ error: "Invalid username or password" });
+//     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) {
-      return res.status(401).json({ error: "Invalid username or password" });
-    }
+//     const passwordMatch = await bcrypt.compare(password, user.password);
+//     if (!passwordMatch) {
+//       return res.status(401).json({ error: "Invalid username or password" });
+//     }
 
-    const token = jwt.sign({ userId: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.json({ token:token, username:user.username });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-});
+//     const token = jwt.sign({ userId: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
+//     res.json({ token:token, username:user.username });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
