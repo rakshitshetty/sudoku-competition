@@ -38,7 +38,7 @@ const Sudoku = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/submit-score", {
+      const response = await fetch("http://localhost:5000/api/leaderboard/submit-score", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
