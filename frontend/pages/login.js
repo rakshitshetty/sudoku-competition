@@ -26,6 +26,7 @@ const Login = () => {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("token", data.token);
+        localStorage.setItem("username", data.username);
         router.push("/");
       } else {
         setError(data.error || "Invalid credentials");
