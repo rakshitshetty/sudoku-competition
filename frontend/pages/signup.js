@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/Login.module.css";
+import { signupUser } from "../services/authServices";
 
 const Signup = () => {
   const router = useRouter();
@@ -15,24 +16,14 @@ const Signup = () => {
     e.preventDefault();
     setError("");
 
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+    const data = await signupUser(formData);
 
-      const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("username", formData.username);
-        router.push("/");
-      } else {
-        setError(data.error || "Signup failed");
-      }
-    } catch (error) {
-      console.error("Signup error:", error);
-      setError("Something went wrong. Please try again.");
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", data.username);
+      router.push("/");
+    } else {
+      setError(data.error || "Signup failed");
     }
   };
 
@@ -69,4 +60,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;  // ✅ Make sure this is present!
+export default Signup; 
