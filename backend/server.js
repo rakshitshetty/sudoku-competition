@@ -1,30 +1,18 @@
 require('dotenv').config();
 const express = require("express");
-const cors = require("cors");
-const session = require("express-session");
 const http = require('http');
-
+const { configureMiddleware } = require("./middleware/middlewares");
 const app = express();
 const server = http.createServer(app);
+
+// Apply middleware configurations
+configureMiddleware(app);
+
+// Initialize WebSocket
 const socket = require("./socket");
 socket.init(server);
 
-app.use(cors({
-  origin: "http://localhost:3000", // ✅ Allow frontend origin
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true // ✅ Allow cookies and authentication headers
-}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Configure session middleware
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'secretkey',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }
-}));
-
+// Use routes
 const leaderboardRoutes = require("./routes/leaderboard");
 app.use("/api/leaderboard", leaderboardRoutes);
 
