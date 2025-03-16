@@ -54,7 +54,7 @@ const Sudoku = () => {
         }, 500);
       }
 
-      if (true || Object.keys(userInput).length + 1 === puzzle.flat().filter((num) => num === 0).length) {
+      if (Object.keys(userInput).length + 1 === puzzle.flat().filter((num) => num === 0).length) {
         const endTime = Date.now();
         const timeTaken = Math.floor((endTime - startTime) / 1000);
         submitScore(timeTaken);

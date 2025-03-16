@@ -8,6 +8,10 @@
     backdrop-filter: blur(20px);
   }
   
+  .title {
+    padding: 20px;
+  }
+
   .grid {
     display: grid;
     grid-template-columns: repeat(9, 50px);

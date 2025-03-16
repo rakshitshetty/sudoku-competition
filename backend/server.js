@@ -22,6 +22,9 @@ app.use("/api/auth", authRoutes);
 const puzzleRoutes = require("./routes/puzzle");
 app.use("/api/puzzle", puzzleRoutes);
 
+const tournamentRoutes = require("./routes/tournament");
+app.use("/api/tournament", tournamentRoutes);
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
