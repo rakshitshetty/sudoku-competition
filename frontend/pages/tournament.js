@@ -121,21 +121,21 @@ export default function TournamentList() {
           <>
             <h2 className="tournament-title">{selectedTournament.name}</h2>
             <p className="tournament-status"><strong>Status:</strong> {selectedTournament.status}</p>
-            <p className="tournament-players"><strong>Players:</strong> {players.length} / {selectedTournament.max_players}</p>
+            <p className="tournament-players "><strong>Players:</strong> {players.length} / {selectedTournament.max_players}</p>
             {selectedTournament.status === "waiting" && (
               <button className="join-button" onClick={() => handleSignup(selectedTournament.id)}>
                 Join Tournament
               </button>
             )}
             <h3 className="section-title">Players Signed Up</h3>
-            <ul className="players-list">
+            <ul className="players-list tournament-scroll">
               {players.map((player) => (
                 <li key={player.id}>{player.username}</li>
               ))}
             </ul>
             <h3 className="section-title">Tournament Matches</h3>
             {matches.length > 0 ? (
-              <ul className="matches-list">
+              <ul className="matches-list tournament-scroll">
                 {matches.map((match) => (
                 <li key={match.id}>
                     Round {match.round}: {match.player1_name || "TBD"} vs {match.player2_name || "TBD"}
