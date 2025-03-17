@@ -35,7 +35,7 @@ export const fetchTournamentStatus = async (id) => {
     });
     return await response.json();
   } catch (error) {
-    console.error("Error submitting solution:", error);
+    console.error("Error fetching tournament status:", error);
     return { success: false };
   }
 };
@@ -55,7 +55,7 @@ export const fetchTournamentPlayers = async (id) => {
       });
       return await response.json();
     } catch (error) {
-      console.error("Error submitting solution:", error);
+      console.error("Error fetching players:", error);
       return { success: false };
     }
 };
@@ -75,7 +75,7 @@ export const fetchTournamentMatches = async (id) => {
       });
       return await response.json();
     } catch (error) {
-      console.error("Error submitting solution:", error);
+      console.error("Error fetching matches:", error);
       return { success: false };
     }
 };
@@ -95,7 +95,29 @@ export const tournamentSignup = async (tournamentId) => {
           },
         body: JSON.stringify({ tournamentId }),
       });
-      return await response.json();
+      return await response;
+    } catch (error) {
+      console.error("Error signing up for tournament", error);
+      return { success: false };
+    }
+};
+
+export const createTournament = async (newTournament) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You need to log in!");
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/tournament/create`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // Attach token
+          },
+          body: JSON.stringify(newTournament),
+      });
+      return await response;
     } catch (error) {
       console.error("Error signing up for tournament", error);
       return { success: false };

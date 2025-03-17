@@ -1,20 +1,27 @@
 import { useState, useEffect } from 'react';
 import "../styles/tournament.css"; 
-import { fetchTournamentList, fetchTournamentStatus, fetchTournamentPlayers, fetchTournamentMatches, tournamentSignup } from "../services/tournamentServices";
+import { fetchTournamentList, fetchTournamentStatus, fetchTournamentPlayers, fetchTournamentMatches, tournamentSignup, createTournament } from "../services/tournamentServices";
 
 export default function TournamentList() {
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState(null);
   const [players, setPlayers] = useState([]);
   const [matches, setMatches] = useState([]);
+  const [newTournament, setNewTournament] = useState({ name: "", maxPlayers: 4 });
 
   useEffect(() => {
     async function fetchTournaments() {
-        const data = await fetchTournamentList();
-        setTournaments(data);
+        setTournamentList();
+        // const data = await fetchTournamentList();
+        // setTournaments(data);
     }
     fetchTournaments();
   }, []);
+
+  const setTournamentList = async() => {
+    const data = await fetchTournamentList();
+    setTournaments(data);
+  } 
 
   const reset = () => {
     setPlayers([]);
@@ -38,26 +45,33 @@ export default function TournamentList() {
     setMatches(matchesData);
   };
 
+  const handleCreateTournament = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You need to log in!");
+      return;
+    }
+
+    const data = await createTournament(newTournament);
+      if (data.ok) {
+        alert("Tournament created successfully!");
+        setTournamentList();
+      } else {
+        alert(data.error);
+      }
+
+  }
+
   const handleSignup = async (tournamentId) => {
     const token = localStorage.getItem("token");
     if (!token) {
         alert(" You need to log in to view tournament data!");
         return;
     }
-
-    //   const res = await fetch("http://localhost:5000/api/tournament/signup", {
-    //     method: "POST",
-    //     headers: {
-    //         "Content-Type": "application/json",
-    //         "Authorization": `Bearer ${token}` // Attach token
-    //       },
-    //     body: JSON.stringify({ tournamentId }),
-    //   });
-  
-    //   const data = await res.json();
       const data = await tournamentSignup(tournamentId);
   
-      if (res.ok) {
+      if (data.ok) {
         alert("Successfully signed up!");
         fetchTournamentDetails(tournamentId); // Refresh player list
       } else {
@@ -70,13 +84,37 @@ export default function TournamentList() {
     <div className="tournament-container">
       <div className="tournament-list">
         <h1 className="tournament-title">Tournaments</h1>
-        {tournaments.map((tournament) => (
-          <div key={tournament.id} className="tournament-card" onClick={() => fetchTournamentDetails(tournament.id)}>
-            <h2>{tournament.name}</h2>
-            <p>Players: {tournament.players_signed_up} / {tournament.max_players}</p>
-            <p>Status: <span style={{ color: tournament.status === 'in-progress' ? 'green' : 'orange' }}>{tournament.status}</span></p>
-          </div>
-        ))}
+
+        {/* Tournament Creation Form */}
+        <form className="tournament-form" onSubmit={handleCreateTournament}>
+          <input
+            type="text"
+            placeholder="Tournament Name"
+            value={newTournament.name}
+            onChange={(e) => setNewTournament({ ...newTournament, name: e.target.value })}
+            required
+          />
+          <input
+            type="number"
+            min="2"
+            max="16"
+            placeholder="Max Players"
+            value={newTournament.maxPlayers}
+            onChange={(e) => setNewTournament({ ...newTournament, maxPlayers: e.target.value })}
+            required
+          />
+          <button type="submit" className="create-button">Create Tournament</button>
+        </form>
+
+        <div className="tournament-scroll">
+            {tournaments.map((tournament) => (
+            <div key={tournament.id} className="tournament-card" onClick={() => fetchTournamentDetails(tournament.id)}>
+                <h2>{tournament.name}</h2>
+                <p>Players: {tournament.players_signed_up} / {tournament.max_players}</p>
+                <p>Status: <span style={{ color: tournament.status === 'in-progress' ? 'green' : 'orange' }}>{tournament.status}</span></p>
+            </div>
+            ))}
+        </div>
       </div>
       <div className="tournament-details">
         {selectedTournament ? (
