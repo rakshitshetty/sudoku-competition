@@ -2,6 +2,47 @@ const pool = require("../database/db");
 const { getSudoku } = require("sudoku-gen");
 const {generateTournamentPuzzle} = require("../controllers/puzzleController");
 
+
+exports.getAllTournaments = async (req, res) => {
+    try {
+        // Fetch all tournaments ordered by creation date (newest first)
+        const result = await pool.query(
+            "SELECT * FROM tournaments ORDER BY created_at DESC"
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "No tournaments found." });
+        }
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error fetching tournaments:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+exports.getTournamentPlayers = async (req, res) => {
+    try {
+        const { id: tournamentId } = req.params; // Extract tournamentId from URL parameters
+
+        if (!tournamentId) {
+            return res.status(400).json({ error: "Tournament ID is required." });
+        }
+        const result = await pool.query(
+            `SELECT users.id, users.username 
+             FROM tournament_players 
+             JOIN users ON tournament_players.user_id = users.id
+             WHERE tournament_players.tournament_id = $1`,
+            [tournamentId]
+        );
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error fetching tournament players:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
 // Create a tournament
 exports.createTournament = async (req, res) => {
     const { name, maxPlayers } = req.body;
@@ -54,38 +95,59 @@ exports.signUpForTournament = async (req, res) => {
 // Function to start tournament once it's full
 const startTournament = async (tournamentId) => {
     try {
+        console.log("starting tournament for id:");
+        console.log(tournamentId);
         await pool.query("UPDATE tournaments SET status = 'in-progress' WHERE id = $1", [tournamentId]);
 
         // Get all players
-        const players = await pool.query(
+        const playersRes = await pool.query(
             "SELECT user_id FROM tournament_players WHERE tournament_id = $1",
             [tournamentId]
         );
 
-        // Shuffle players randomly
-        const shuffledPlayers = players.rows.map(p => p.user_id).sort(() => Math.random() - 0.5);
+        const players = playersRes.rows.map(row => row.user_id);
+        console.log("players");
+        console.log(players);
 
-        // Assign matches with unique puzzles
-        for (let i = 0; i < shuffledPlayers.length; i += 2) {
-            if (i + 1 < shuffledPlayers.length) {
-                // Create match
-                const matchResult = await pool.query(
-                    "INSERT INTO tournament_matches (tournament_id, round, player1_id, player2_id) VALUES ($1, 1, $2, $3) RETURNING id",
-                    [tournamentId, shuffledPlayers[i], shuffledPlayers[i + 1]]
-                );
-
-                const matchId = matchResult.rows[0].id;
-
-                // Generate and assign puzzle to match
-                await puzzleController.generateTournamentPuzzle(matchId);
-            }
-        }
+        await generateTournamentMatches(tournamentId, players);
 
         console.log(`🎯 Tournament ${tournamentId} started!`);
     } catch (error) {
         console.error("❌ Error starting tournament", error);
     }
 };
+
+const generateTournamentMatches = async (tournamentId, players) => {
+    try {
+        let round = 1;
+        let matchups = [...players];
+
+        while (matchups.length > 1) {
+            let newRound = [];
+            
+            for (let i = 0; i < matchups.length; i += 2) {
+                if (i + 1 < matchups.length) {
+                    const puzzle = await generateTournamentPuzzle();
+                    const puzzle_id = puzzle.id;
+                    // Create match for two players
+                    await pool.query(
+                        `INSERT INTO tournament_matches (tournament_id, round, player1_id, player2_id, puzzle_id)
+                         VALUES ($1, $2, $3, $4, $5)`,
+                        [tournamentId, round, matchups[i], matchups[i + 1], puzzle_id]
+                    );
+                    newRound.push(matchups[i]); // Advance winner placeholder
+                } else {
+                    newRound.push(matchups[i]); // Odd player advances
+                }
+            }
+            matchups = newRound;
+            round++;
+        }
+    } catch (error) {
+        console.error("Error generating tournament matches:", error);
+    }
+};
+
 
 // Generate unique Sudoku puzzle (Stub for now)
 const generateUniquePuzzle = async (req, res) => {
@@ -149,7 +211,15 @@ exports.getTournamentMatches = async (req, res) => {
 
         // Fetch matches for the given tournament ID
         const result = await pool.query(
-            "SELECT * FROM tournament_matches WHERE tournament_id = $1 ORDER BY round ASC",
+            `SELECT tm.id, tm.round, 
+                    u1.username AS player1_name, 
+                    u2.username AS player2_name, 
+                    tm.winner_id
+             FROM tournament_matches tm
+             LEFT JOIN users u1 ON tm.player1_id = u1.id
+             LEFT JOIN users u2 ON tm.player2_id = u2.id
+             WHERE tm.tournament_id = $1
+             ORDER BY tm.round ASC`,
             [tournamentId]
         );
 

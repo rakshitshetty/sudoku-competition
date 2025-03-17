@@ -4,6 +4,9 @@ const authenticate = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+//list all tournaments
+router.get("/list", authenticate, tournamentController.getAllTournaments);
+
 // Create a tournament
 router.post("/create", authenticate, tournamentController.createTournament);
 
@@ -16,7 +19,11 @@ router.get("/:id/status", tournamentController.getTournamentStatus);
 // Submit match result
 router.post("/:id/match-result", authenticate, tournamentController.submitMatchResult);
 
+//get the tournament matches
 router.get("/:id/matches", authenticate, tournamentController.getTournamentMatches);
+
+// get teh tournament players
+router.get("/:id/players", authenticate, tournamentController.getTournamentPlayers);
 
 module.exports = router;
 

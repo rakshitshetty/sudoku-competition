@@ -14,27 +14,30 @@ exports.getDailyPuzzle = async (req, res) => {
 // Generate a unique Sudoku puzzle for a tournament match
 exports.generateTournamentPuzzle = async (matchId) => {
     try {
-
       const difficulty = "hard"; 
       
-        // Generate puzzle (options: "easy", "medium", "hard")
-        const puzzleData = getSudoku(difficulty);
-        console.log("Generated Sudoku Data:", JSON.stringify(puzzleData, null, 2));
-  
-        // Convert puzzle into a JSON-compatible format (replace dashes with null)
-        const puzzleArray = puzzleData.puzzle.split("").map(char => (char === "-" ? 0  : parseInt(char)));
-        const solutionArray = puzzleData.solution.split("").map(char => parseInt(char));
-  
-        // Convert to JSON strings
-        const puzzleJson = JSON.stringify(puzzleArray);
-        const solutionJson = JSON.stringify(solutionArray);
+      // Generate puzzle
+      const sudokuData = getSudoku(difficulty);
+
+      // Convert the string format into a 9x9 integer array
+      const convertToGrid = (str) => {
+          return Array.from({ length: 9 }, (_, row) =>
+              str.slice(row * 9, (row + 1) * 9).split("").map(char => (char === "-" ? 0 : parseInt(char)))
+          );
+      };
+
+      const puzzleGrid = convertToGrid(sudokuData.puzzle);
+      const solutionGrid = convertToGrid(sudokuData.solution);
+
+      // Store in PostgreSQL as JSON
+      const puzzleJson = JSON.stringify(puzzleGrid);
+      const solutionJson = JSON.stringify(solutionGrid);
 
         // Store in DB
         const result = await pool.query(
-            "INSERT INTO puzzles (puzzle, solution, difficulty, tournament_match_id) VALUES ($1, $2, $3, NOW()) RETURNING *",
-            [puzzleJson, solutionJson, difficulty, matchId]
+            "INSERT INTO puzzles (puzzle, solution, difficulty, created_at) VALUES ($1, $2, $3, NOW()) RETURNING *",
+            [puzzleJson, solutionJson, difficulty]
         );
-
         return result.rows[0]; // Return the stored puzzle
     } catch (error) {
         console.error("Error generating tournament puzzle:", error);

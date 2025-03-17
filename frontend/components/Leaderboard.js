@@ -16,28 +16,6 @@ const Leaderboard = () => {
 
     return () => socket.off("leaderboardUpdate", updateLeaderboard);
   }, []);
-  // useEffect(() => {
-  //   const fetchLeaderboard = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:5000/api/leaderboard");
-  //       const data = await response.json();
-  //       setLeaderboard(data);
-  //     } catch (error) {
-  //       console.error("Error fetching leaderboard:", error);
-  //     }
-  //   };
-
-  //   fetchLeaderboard();
-
-  //   // Listen for real-time leaderboard updates
-  //   socket.on("leaderboardUpdate", fetchLeaderboard);
-
-  //   return () => {
-  //     socket.off("leaderboardUpdate", fetchLeaderboard);
-  //   };
-  // }, []);
-
-
 
   return (
     <div className={styles.leaderboardContainer}>
